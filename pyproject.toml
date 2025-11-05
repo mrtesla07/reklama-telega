@@ -1,0 +1,36 @@
+ [build-system]
+requires = ["setuptools>=61.0"]
+ build-backend = "setuptools.build_meta"
+
+ [project]
+ name = "reklama-telega"
+ version = "0.1.0"
+ description = "Keyword monitor for Telegram channel comments using Telethon."
+ readme = "README.md"
+ requires-python = ">=3.11"
+ authors = [
+   { name = "Your Name", email = "you@example.com" }
+ ]
+ license = { text = "MIT" }
+ dependencies = [
+   "telethon>=1.34.0",
+   "rich>=13.7.0",
+   "PySide6>=6.7.0",
+   "qasync>=0.24.0",
+   "aiosqlite>=0.21.0"
+]
+
+ [project.optional-dependencies]
+ dev = [
+   "black",
+   "mypy",
+   "ruff"
+ ]
+
+[project.scripts]
+reklama-telega = "reklama_telega.cli:main"
+reklama-telega-gui = "reklama_telega.gui.app:main"
+
+ [tool.setuptools.packages.find]
+ where = ["."]
+ include = ["reklama_telega*"]

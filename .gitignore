@@ -1,0 +1,9 @@
+.venv/
+build/
+dist/
+logs/
+temp_extract/
+reklama_telega.egg-info/
+__pycache__/
+*.py[cod]
+
