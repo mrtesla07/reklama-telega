@@ -5,6 +5,13 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Тег релиза (пример: v0.2.0)"
+        required: true
+      release_name:
+        description: "Название релиза (по умолчанию совпадает с тегом)"
+        required: false
 
 permissions:
   contents: write
@@ -73,7 +80,7 @@ jobs:
       - build
       - build-windows-exe
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Download Python distributions
@@ -88,9 +95,30 @@ jobs:
           name: windows-exe
           path: dist
 
+      - name: Set release variables (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "RELEASE_TAG=${{ inputs.release_tag }}" >> "$GITHUB_ENV"
+          if [ -n "${{ inputs.release_name }}" ]; then
+            echo "RELEASE_NAME=${{ inputs.release_name }}" >> "$GITHUB_ENV"
+          else
+            echo "RELEASE_NAME=${{ inputs.release_tag }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set release variables (tag push)
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
+          echo "RELEASE_NAME=$TAG" >> "$GITHUB_ENV"
+
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_NAME }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
